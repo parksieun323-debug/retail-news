@@ -2,11 +2,20 @@
 
 import { useEffect, useState } from 'react';
 
+interface Article {
+  title: string;
+  link: string;
+  date: string;
+  source: string;
+  category: string;
+  summary: string;
+}
+
 const CATEGORIES = ['전체', '백화점', '마트', '편의점', '면세점', '이커머스', '식음료', '패션', '뷰티', '지주사·그룹'];
 const COMPANIES = ['전체', '롯데', '신세계', '현대백화점', 'CJ', '이마트', 'SSG', '쿠팡', '컬리', '올리브영', '무신사'];
 
 export default function Home() {
-  const [articles, setArticles] = useState([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedCompany, setSelectedCompany] = useState('전체');
@@ -36,7 +45,7 @@ export default function Home() {
     return matchCategory && matchCompany && matchSearch;
   });
 
-  const fmt = (s) => {
+  const fmt = (s: string) => {
     const d = new Date(s);
     return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
   };
