@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
 
+export const revalidate = 0;
+
 const parser = new Parser();
 
 const RSS_FEEDS = [
@@ -15,14 +17,12 @@ const RSS_FEEDS = [
   { url: 'https://www.joongang.co.kr/RSS/economy.xml', source: '중앙일보' },
   { url: 'https://www.hani.co.kr/rss/economy/', source: '한겨레' },
   { url: 'https://www.hankookilbo.com/rss/economy.xml', source: '한국일보' },
-
   // 방송/통신사
   { url: 'https://feeds.news1.kr/articles/all', source: '뉴스1' },
   { url: 'https://www.newsis.com/RSS/economy.xml', source: '뉴시스' },
   { url: 'https://www.yna.co.kr/RSS/economy.xml', source: '연합뉴스' },
   { url: 'https://www.yonhapnewstv.co.kr/rss/economy.xml', source: '연합뉴스TV' },
   { url: 'https://biz.sbs.co.kr/rss/economy.xml', source: 'SBS Biz' },
-
   // 경제 매체
   { url: 'https://www.mk.co.kr/rss/30000001/', source: '매일경제' },
   { url: 'https://www.mt.co.kr/rss/economy.xml', source: '머니투데이' },
@@ -35,28 +35,24 @@ const RSS_FEEDS = [
   { url: 'https://www.fn.co.kr/rss/rss.xml', source: '파이낸셜뉴스' },
   { url: 'https://www.hankyung.com/feed/all-news', source: '한국경제' },
   { url: 'https://www.heraldcorp.com/rss/010000000000.xml', source: '헤럴드경제' },
-
   // 인터넷
   { url: 'https://www.nocutnews.co.kr/rss/economy.xml', source: '노컷뉴스' },
   { url: 'https://thefact.co.kr/rss/allArticle.xml', source: '더팩트' },
   { url: 'https://www.dailian.co.kr/rss/allArticle.xml', source: '데일리안' },
   { url: 'https://www.inews24.com/rss/economy.xml', source: '아이뉴스24' },
   { url: 'https://www.ohmynews.com/rss/economy.xml', source: '오마이뉴스' },
-
   // IT
   { url: 'https://www.ddaily.co.kr/rss/allArticle.xml', source: '디지털데일리' },
   { url: 'https://www.dt.co.kr/rss/economy.xml', source: '디지털타임스' },
   { url: 'https://www.bloter.net/feed', source: '블로터' },
   { url: 'https://www.etnews.com/rss/economy.xml', source: '전자신문' },
   { url: 'https://zdnet.co.kr/rss/economy.xml', source: '지디넷코리아' },
-
   // 매거진
   { url: 'https://www.thescoop.co.kr/rss/allArticle.xml', source: '더스쿠프' },
   { url: 'https://www.mk.co.kr/rss/50200011/', source: '매경이코노미' },
   { url: 'https://www.sisain.co.kr/rss/allArticle.xml', source: '시사IN' },
   { url: 'https://www.economist.co.kr/rss/allArticle.xml', source: '이코노미스트' },
   { url: 'https://magazine.hankyung.com/business/rss', source: '한경비즈니스' },
-
   // 비CP 매체
   { url: 'https://www.newsworks.co.kr/rss/allArticle.xml', source: '뉴스웍스' },
   { url: 'https://www.newspim.com/rss/economy.xml', source: '뉴스핌' },
@@ -124,7 +120,7 @@ export async function GET() {
             results.push({
               title,
               link: item.link,
-              date: item.pubDate,
+              date: item.pubDate || new Date().toISOString(),
               source: feed.source,
               category: getCategory(title),
               summary: snippet.slice(0, 120),
@@ -139,5 +135,8 @@ export async function GET() {
 
   results.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  return NextResponse.json({ articles: results });
+  return NextResponse.json(
+    { articles: results },
+    { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+  );
 }
